@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="uk" data-palette="olive">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Адмінка календаря</title>
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/admin.css">
+<script>
+  try { var p = localStorage.getItem("mc.palette"), m = localStorage.getItem("mc.mode");
+    if (p) document.documentElement.dataset.palette = p;
+    if (m === "light" || m === "dark") document.documentElement.dataset.theme = m; } catch (e) {}
+</script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="container gutter">
+    <a class="brand" href="./" title="Відкрити сайт">
+      <svg width="26" height="30" viewBox="0 0 48 56" aria-hidden="true"><path d="M24 2 45 9v18c0 14-10 23-21 27C13 50 3 41 3 27V9Z" fill="#0057b8"/><path d="M3 27h42c0 14-10 23-21 27C13 50 3 41 3 27Z" fill="#ffd700"/></svg>
+      <b>Адмінка</b>
+    </a>
+    <span class="conn" id="conn"><i></i><span>Не підключено</span></span>
+    <span class="spacer"></span>
+    <span class="dirty" id="dirty" hidden></span>
+    <button class="btn primary" id="publishBtn">Опублікувати</button>
+  </div>
+</header>
+
+<div class="admin gutter">
+  <div class="container admin-grid">
+    <nav class="side-nav" aria-label="Розділи адмінки">
+      <a href="#events" data-tab="events">Події <span id="cntEvents"></span></a>
+      <a href="#categories" data-tab="categories">Категорії</a>
+      <a href="#logos" data-tab="logos">Емблеми</a>
+      <a href="#site" data-tab="site">Сайт і теми</a>
+      <a href="#connect" data-tab="connect">Підключення</a>
+    </nav>
+    <main id="pane" aria-live="polite"><p class="empty">Завантаження…</p></main>
+  </div>
+</div>
+
+<!-- Редактор події -->
+<dialog id="editor" class="sheet" aria-labelledby="edTitle">
+  <form id="evForm" method="dialog" novalidate>
+    <header class="sheet-head">
+      <h2 id="edTitle">Подія</h2>
+      <button type="button" class="btn icon ghost" data-close aria-label="Закрити">✕</button>
+    </header>
+    <div class="sheet-body">
+      <div class="form-grid">
+        <label class="f wide"><span>Назва <span class="req">*</span></span><input id="fTitle" required maxlength="200"></label>
+        <label class="f">Категорія<select id="fCat"></select></label>
+        <label class="f">Скорочення на щиті<input id="fAbbr" maxlength="6" placeholder="до 6 символів"></label>
+
+        <fieldset class="f wide">
+          <legend>Дата</legend>
+          <div class="seg seg3" id="fKind" role="radiogroup">
+            <button type="button" data-kind="date" role="radio">Фіксована</button>
+            <button type="button" data-kind="nth" role="radio">День тижня</button>
+            <button type="button" data-kind="easter" role="radio">Від Великодня</button>
+          </div>
+          <div class="kind-row" data-for="date">
+            <label class="f">День<input id="fDay" type="number" min="1" max="31" inputmode="numeric"></label>
+            <label class="f">Місяць<select id="fMonth"></select></label>
+          </div>
+          <div class="kind-row" data-for="nth">
+            <label class="f">Котрий<select id="fOrd">
+              <option value="1">Перший</option><option value="2">Другий</option><option value="3">Третій</option><option value="4">Четвертий</option><option value="-1">Останній</option>
+            </select></label>
+            <label class="f">День тижня<select id="fWd">
+              <option value="1">понеділок</option><option value="2">вівторок</option><option value="3">середа</option><option value="4">четвер</option><option value="5">п'ятниця</option><option value="6">субота</option><option value="0">неділя</option>
+            </select></label>
+            <label class="f">Місяць<select id="fMonth2"></select></label>
+          </div>
+          <div class="kind-row" data-for="easter">
+            <label class="f">Днів після Великодня<input id="fEaster" type="number" min="-60" max="120" inputmode="numeric"></label>
+          </div>
+        </fieldset>
+
+        <label class="f">Рік створення / заснування<input id="fYear" type="number" min="800" max="2100" inputmode="numeric" placeholder="необов'язково"></label>
+        <label class="f">Посилання на сторінку<input id="fUrl" type="url" placeholder="https://"></label>
+        <label class="f wide">Опис<textarea id="fDesc" rows="3" maxlength="600"></textarea></label>
+
+        <div class="f wide">
+          <span>Емблема</span>
+          <div class="logo-pick">
+            <select id="fLogo" aria-label="Емблема"></select>
+            <label class="btn" for="fLogoUp">Завантажити нову</label>
+            <input id="fLogoUp" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" hidden>
+          </div>
+        </div>
+      </div>
+      <p class="err" id="fErr" role="alert" hidden></p>
+      <div class="preview">
+        <div class="label">Попередній перегляд</div>
+        <div id="fPreview"></div>
+      </div>
+    </div>
+    <footer class="sheet-foot">
+      <button type="button" class="btn danger ghost" id="fDelete">Видалити</button>
+      <span class="spacer"></span>
+      <button type="button" class="btn" data-close>Скасувати</button>
+      <button type="submit" class="btn primary" id="fSave">Зберегти</button>
+    </footer>
+  </form>
+</dialog>
+
+<!-- Підтвердження -->
+<dialog id="confirm" class="sheet small">
+  <div class="sheet-body"><h2 id="cTitle"></h2><p id="cText" class="muted"></p></div>
+  <footer class="sheet-foot"><span class="spacer"></span><button class="btn" id="cNo">Скасувати</button><button class="btn primary" id="cYes">Так</button></footer>
+</dialog>
+
+<!-- Публікація -->
+<dialog id="publish" class="sheet small">
+  <form method="dialog" id="pubForm">
+    <header class="sheet-head"><h2>Опублікувати зміни</h2><button type="button" class="btn icon ghost" data-close aria-label="Закрити">✕</button></header>
+    <div class="sheet-body">
+      <div id="pubSummary"></div>
+      <label class="f">Опис коміту<input id="pubMsg" maxlength="120"></label>
+      <p class="muted small">Зміни потраплять у гілку репозиторію. GitHub Pages оновить сайт приблизно за 1–2 хвилини.</p>
+      <p class="err" id="pubErr" role="alert" hidden></p>
+    </div>
+    <footer class="sheet-foot"><span class="spacer"></span><button type="button" class="btn" data-close>Скасувати</button><button type="submit" class="btn primary" id="pubGo">Опублікувати</button></footer>
+  </form>
+</dialog>
+
+<div class="toast" id="toast" role="status" hidden></div>
+<script type="module" src="assets/admin.js"></script>
+</body>
+</html>

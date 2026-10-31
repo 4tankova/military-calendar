@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="uk" data-palette="olive">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Календар Сил оборони</title>
+<meta name="description" content="Державні, пам'ятні та військові свята України, дні створення бригад і частин.">
+<meta property="og:title" content="Календар Сил оборони України">
+<meta property="og:description" content="Державні, пам'ятні та військові свята, дні створення бригад і частин.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#1f2a1c">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="assets/style.css">
+<script>
+  // Тема до першого кадру, щоб не блимало
+  try { var p = localStorage.getItem("mc.palette"), m = localStorage.getItem("mc.mode");
+    if (p) document.documentElement.dataset.palette = p;
+    if (m === "light" || m === "dark") document.documentElement.dataset.theme = m; } catch (e) {}
+</script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="container gutter">
+    <a class="brand" href="#calendar" aria-label="На головну">
+      <svg width="26" height="30" viewBox="0 0 48 56" aria-hidden="true"><path d="M24 2 45 9v18c0 14-10 23-21 27C13 50 3 41 3 27V9Z" fill="#0057b8"/><path d="M3 27h42c0 14-10 23-21 27C13 50 3 41 3 27Z" fill="#ffd700"/></svg>
+      <b id="brandTitle">Календар Сил оборони</b>
+    </a>
+    <nav class="tabs" aria-label="Розділи">
+      <a href="#calendar" data-view="calendar">Календар</a>
+      <a href="#year" data-view="year">Рік</a>
+      <a href="#units" data-view="units">Частини</a>
+    </nav>
+    <div class="tools">
+      <button class="btn icon ghost" id="searchBtn" aria-label="Пошук (Ctrl+K)" title="Пошук · Ctrl+K">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      </button>
+      <div class="rel">
+        <button class="btn icon ghost" id="themeBtn" aria-label="Тема оформлення" aria-expanded="false" aria-controls="themePop">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3a9 9 0 1 0 9 9c0-1-.8-1.6-1.8-1.6h-2.6a2.4 2.4 0 0 1-1.7-4.1c.9-.9.3-2.3-1-2.3H12Z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="15" cy="7.5" r="1"/></svg>
+        </button>
+        <div class="popover" id="themePop" hidden>
+          <div class="label">Палітра</div>
+          <div class="swatches" id="swatches"></div>
+          <div class="label">Режим</div>
+          <div class="seg" id="modes">
+            <button data-mode="auto">Авто</button><button data-mode="light">Світлий</button><button data-mode="dark">Темний</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section class="hero gutter">
+  <div class="container">
+    <p class="lede" id="lede" hidden></p>
+    <div class="hero-grid">
+      <div class="today-card">
+        <div>
+          <div class="label">Сьогодні</div>
+          <h1 class="today-date" id="todayDate"></h1>
+        </div>
+        <div class="today-events" id="todayEvents"></div>
+      </div>
+      <div class="next-card" id="nextCard"></div>
+    </div>
+    <div class="notice" id="notice" hidden>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3 2 20h20L12 3Z"/><path d="M12 10v4M12 17h.01"/></svg>
+      <span id="noticeText"></span>
+    </div>
+  </div>
+</section>
+
+<main class="gutter">
+  <div class="container" id="view" aria-live="polite">
+    <p class="empty">Завантаження календаря…</p>
+  </div>
+</main>
+
+<footer class="gutter">
+  <div class="container">
+    <span id="footText"></span>
+    <span>Оновлено: <span id="updated">—</span> · <a href="admin.html" rel="nofollow">Адміністрування</a></span>
+  </div>
+</footer>
+
+<dialog id="palette" aria-label="Пошук подій">
+  <div class="palette">
+    <input id="pq" type="search" placeholder="Бригада, свято, рід військ…" autocomplete="off" aria-label="Пошук">
+    <div class="results" id="results" role="listbox"></div>
+    <div class="palette-foot"><span><kbd>↑</kbd> <kbd>↓</kbd> вибір</span><span><kbd>Enter</kbd> відкрити</span><span><kbd>Esc</kbd> закрити</span></div>
+  </div>
+</dialog>
+
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script type="module" src="assets/app.js"></script>
+<script>
+  if ("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js").catch(function () {});
+</script>
+</body>
+</html>

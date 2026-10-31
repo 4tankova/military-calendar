@@ -1,0 +1,12 @@
+{
+  "name": "Календар Сил оборони України",
+  "short_name": "Календар СО",
+  "description": "Державні, пам'ятні та військові свята, дні створення бригад.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#1f2a1c",
+  "theme_color": "#1f2a1c",
+  "lang": "uk",
+  "icons": [{ "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}
